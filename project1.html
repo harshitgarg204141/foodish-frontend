@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Foodish — Food Delivery Frontend</title>
+  <meta name="description" content="A modern frontend single-file React app for a food delivery page (index.html)" />
+  <style>
+    /* -----------------------
+       Simple Reset & vars
+       ----------------------- */
+    :root{
+      --bg: #0f1724; /* deep indigo */
+      --card: #0b1220;
+      --muted: #98a0b3;
+      --accent: #ff6b35; /* orange */
+      --accent-2: #ffd166;
+      --glass: rgba(255,255,255,0.04);
+      --radius: 14px;
+      --max-width: 1100px;
+      --shadow: 0 6px 20px rgba(2,6,23,0.6);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing: border-box}
+    html,body,#root{height:100%}
+    body{
+      margin:0;
+      background: radial-gradient(1200px 400px at 10% 10%, rgba(255,107,53,0.06), transparent),
+                  linear-gradient(180deg, #071029 0%, #041122 100%);
+      color: #e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:32px 20px;
+    }
+
+    .container{
+      max-width:var(--max-width);
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: 1fr 380px;
+      gap:28px;
+      align-items:start;
+    }
+
+    /* Header */
+    header.app-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:18px;
+      gap:16px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .logo{
+      width:46px;
+      height:46px;
+      background:linear-gradient(135deg,var(--accent),#ff8a66);
+      border-radius:12px;
+      display:inline-grid;place-items:center;font-weight:700;color:#081023;
+      box-shadow: 0 6px 18px rgba(255,107,53,0.12);
+      font-size:18px;
+    }
+    .brand h1{margin:0;font-size:18px;letter-spacing:-0.2px}
+    .brand p{margin:0;font-size:12px;color:var(--muted)}
+
+    .searchbar{
+      background:var(--glass);
+      padding:8px 12px;
+      border-radius:12px;
+      display:flex;gap:10px;align-items:center;min-width:320px;
+      box-shadow: inset 0 -1px 0 rgba(255,255,255,0.02);
+    }
+    .searchbar input{background:transparent;border:0;color:inherit;outline:none;font-size:14px;width:100%}
+
+    /* Left column */
+    .left{
+      display:flex;flex-direction:column;gap:18px;
+    }
+
+    .hero{
+      background:linear-gradient(90deg, rgba(255,107,53,0.06), rgba(255,209,102,0.03));
+      border-radius:var(--radius);
+      padding:20px;display:flex;justify-content:space-between;align-items:center;gap:16px;box-shadow:var(--shadow);
+    }
+    .hero .text h2{margin:0 0 8px 0;font-size:20px}
+    .hero .text p{margin:0;color:var(--muted)}
+    .hero .cta{background:linear-gradient(90deg,var(--accent),#ff8a66);padding:10px 14px;border-radius:12px;color:#071023;font-weight:700;border:none}
+
+    /* Restaurants grid */
+    .restaurants{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      border-radius:12px;padding:12px;box-shadow:0 8px 24px rgba(2,6,23,0.5);
+      transition:transform .18s ease, box-shadow .18s ease;cursor:pointer;
+    }
+    .card:hover{transform:translateY(-6px)}
+
+    .restaurant-top{display:flex;gap:12px;align-items:center}
+    .rest-img{width:64px;height:64px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ffa77d);display:grid;place-items:center;font-weight:700}
+    .meta h3{margin:0;font-size:15px}
+    .meta p{margin:2px 0 0 0;color:var(--muted);font-size:13px}
+
+    .badges{display:flex;gap:8px;margin-top:10px}
+    .badge{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:999px;font-size:12px;color:var(--muted)}
+
+    .menu{
+      margin-top:12px;display:flex;flex-direction:column;gap:8px
+    }
+    .menu-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:10px}
+    .menu-item .left{display:flex;gap:12px;align-items:center}
+    .item-thumb{width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,var(--accent-2),#ffd3a8);display:grid;place-items:center;color:#071023;font-weight:700}
+    .item-info h4{margin:0;font-size:14px}
+    .item-info p{margin:2px 0 0 0;color:var(--muted);font-size:12px}
+    .price{font-weight:700}
+    .add-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:6px 8px;border-radius:8px;color:inherit;cursor:pointer}
+
+    /* Right column (cart) */
+    .cart{
+      position:sticky;top:32px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:16px;border-radius:16px;box-shadow:var(--shadow);
+    }
+    .cart h3{margin:0 0 8px 0}
+    .cart-list{display:flex;flex-direction:column;gap:10px;max-height:380px;overflow:auto;padding-right:6px}
+    .cart-item{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.02);padding:8px;border-radius:10px}
+    .qty{display:flex;gap:6px;align-items:center}
+    .qty button{padding:6px;border-radius:8px;border:0;background:rgba(255,255,255,0.03);cursor:pointer}
+    .checkout{margin-top:12px;background:linear-gradient(90deg,var(--accent),#ff8a66);padding:12px;border-radius:12px;border:0;font-weight:700;width:100%;cursor:pointer}
+
+    /* Empty state */
+    .empty{padding:28px;border-radius:12px;text-align:center;color:var(--muted);background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+
+    /* Footer */
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* Responsive */
+    @media (max-width:980px){
+      .container{grid-template-columns: 1fr;}
+      .cart{position:relative;top:0}
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React + Babel via CDN for single-file demo -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const {useState, useMemo, useEffect} = React;
+
+    /* Sample data - replace with API calls in a real app */
+    const SAMPLE_RESTAURANTS = [
+      {
+        id: 'r1',
+        name: 'Spice Harbor',
+        cuisine: 'Indian • North Indian',
+        eta: '30–40 min',
+        rating: 4.6,
+        items: [
+          {id:'r1m1',name:'Butter Chicken',desc:'Creamy tomato gravy', price: 210},
+          {id:'r1m2',name:'Garlic Naan',desc:'Hand-rolled', price: 45},
+          {id:'r1m3',name:'Paneer Tikka',desc:'Char-grilled cubes', price: 170}
+        ]
+      },
+      {
+        id: 'r2',
+        name: 'Green Bowl',
+        cuisine: 'Healthy • Salads',
+        eta: '20–30 min',
+        rating: 4.8,
+        items: [
+          {id:'r2m1',name:'Quinoa Salad',desc:'Fresh veggies & lemon', price: 150},
+          {id:'r2m2',name:'Avocado Toast',desc:'Sourdough & toppings', price: 130},
+          {id:'r2m3',name:'Protein Bowl',desc:'Chicken, beans, greens', price: 220}
+        ]
+      },
+      {
+        id: 'r3',
+        name: 'Pizzeria Roma',
+        cuisine: 'Italian • Pizza',
+        eta: '25–35 min',
+        rating: 4.5,
+        items: [
+          {id:'r3m1',name:'Margherita',desc:'Classic, fresh basil', price: 260},
+          {id:'r3m2',name:'Pepperoni',desc:'Spicy pepperoni', price: 320},
+          {id:'r3m3',name:'Garlic Bread',desc:'Buttery & crisp', price: 90}
+        ]
+      }
+    ];
+
+    function Header({onSearch, query, cartCount}){
+      return (
+        <header className="app-header">
+          <div className="brand">
+            <div className="logo">F</div>
+            <div>
+              <h1>Foodish</h1>
+              <p>Delicious food, delivered fast</p>
+            </div>
+          </div>
+
+          <div style={{display:'flex',alignItems:'center',gap:12}}>
+            <div className="searchbar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{opacity:0.9}}>
+                <path d="M21 21l-4.35-4.35" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="11" cy="11" r="6" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <input placeholder="Search restaurants or dishes..." value={query} onChange={e=>onSearch(e.target.value)} />
+            </div>
+
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <div style={{textAlign:'right'}}>
+                <div style={{fontSize:12,color:'var(--muted)'}}>Deliver to</div>
+                <div style={{fontWeight:700}}>Home • New Delhi</div>
+              </div>
+              <button className="add-btn" title="Open cart">Cart ({cartCount})</button>
+            </div>
+          </div>
+        </header>
+      );
+    }
+
+    function Hero({onExplore}){
+      return (
+        <div className="hero">
+          <div className="text">
+            <h2>Hungry? Order from the best restaurants near you.</h2>
+            <p>Fast delivery • Secure payments • Real-time tracking</p>
+            <div style={{height:12}} />
+            <button className="cta" onClick={onExplore}>Explore restaurants</button>
+          </div>
+          <div style={{width:240,textAlign:'right'}}>
+            <svg width="200" height="140" viewBox="0 0 200 140" fill="none">
+              <rect x="0" y="0" width="200" height="140" rx="10" fill="rgba(255,255,255,0.02)" />
+            </svg>
+          </div>
+        </div>
+      );
+    }
+
+    function RestaurantCard({r, onAdd}){
+      return (
+        <article className="card" aria-labelledby={r.id}>
+          <div className="restaurant-top">
+            <div className="rest-img">{r.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
+            <div className="meta">
+              <h3 id={r.id}>{r.name} <span style={{fontSize:13,color:'var(--muted)',fontWeight:500}}>• {r.rating}</span></h3>
+              <p>{r.cuisine} • {r.eta}</p>
+            </div>
+          </div>
+
+          <div className="badges">
+            <div className="badge">{Math.round(Math.random()*30)+20} mins</div>
+            <div className="badge">Offers</div>
+            <div className="badge">{r.rating} ★</div>
+          </div>
+
+          <div className="menu">
+            {r.items.slice(0,3).map(it => (
+              <div className="menu-item" key={it.id}>
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <div className="item-thumb">{it.name.split(' ').map(x=>x[0]).slice(0,2).join('')}</div>
+                  <div className="item-info">
+                    <h4>{it.name}</h4>
+                    <p>{it.desc}</p>
+                  </div>
+                </div>
+                <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
+                  <div className="price">₹{it.price}</div>
+                  <button className="add-btn" onClick={()=>onAdd(it,r)}>Add</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+      );
+    }
+
+    function Cart({items, onInc, onDec, onCheckout}){
+      const subtotal = items.reduce((s,it)=>s + it.qty*it.price,0);
+      const delivery = subtotal ? 30 : 0;
+      const total = subtotal + delivery;
+      return (
+        <aside className="cart">
+          <h3>Order summary</h3>
+          <div style={{color:'var(--muted)',fontSize:13}}>Items in your cart</div>
+
+          <div className="cart-list">
+            {items.length === 0 && <div className="empty">Your cart is empty — add something tasty 🍲</div>}
+            {items.map(it => (
+              <div className="cart-item" key={it.id}>
+                <div>
+                  <div style={{fontWeight:700}}>{it.name}</div>
+                  <div style={{fontSize:13,color:'var(--muted)'}}>₹{it.price} • {it.restaurantName}</div>
+                </div>
+                <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:8}}>
+                  <div className="qty">
+                    <button onClick={()=>onDec(it)}>-</button>
+                    <div style={{minWidth:28,textAlign:'center'}}>{it.qty}</div>
+                    <button onClick={()=>onInc(it)}>+</button>
+                  </div>
+                  <div style={{fontWeight:700}}>₹{it.price * it.qty}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{marginTop:12,display:'flex',justifyContent:'space-between',color:'var(--muted)'}}>
+            <div>Subtotal</div>
+            <div>₹{subtotal}</div>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',color:'var(--muted)'}}>
+            <div>Delivery</div>
+            <div>₹{delivery}</div>
+          </div>
+
+          <div style={{marginTop:12,display:'flex',justifyContent:'space-between',fontWeight:800,fontSize:16}}>
+            <div>Total</div>
+            <div>₹{total}</div>
+          </div>
+
+          <button className="checkout" onClick={()=>onCheckout(total)} disabled={items.length===0} style={{opacity: items.length===0?0.6:1}}>Proceed to Checkout</button>
+        </aside>
+      );
+    }
+
+    function App(){
+      const [restaurants, setRestaurants] = useState(SAMPLE_RESTAURANTS);
+      const [query, setQuery] = useState('');
+      const [cart, setCart] = useState([]);
+
+      useEffect(()=>{
+        // Simulate initial data fetch - placeholder for API call
+      },[])
+
+      function handleAdd(item, restaurant){
+        setCart(prev => {
+          const exists = prev.find(p => p.id === item.id);
+          if(exists){
+            return prev.map(p => p.id === item.id ? {...p, qty: p.qty + 1} : p);
+          }
+          return [...prev, {...item, qty:1, restaurantId: restaurant.id, restaurantName: restaurant.name}];
+        });
+      }
+
+      function inc(item){
+        setCart(prev => prev.map(p => p.id === item.id ? {...p, qty: p.qty + 1} : p));
+      }
+      function dec(item){
+        setCart(prev => {
+          const found = prev.find(p => p.id === item.id);
+          if(!found) return prev;
+          if(found.qty === 1) return prev.filter(p => p.id !== item.id);
+          return prev.map(p => p.id === item.id ? {...p, qty: p.qty - 1} : p);
+        });
+      }
+
+      function handleCheckout(total){
+        if(cart.length === 0) return alert('Add something first');
+        alert('Thank you! Your order is placed. Total: ₹' + total);
+        setCart([]);
+      }
+
+      function filtered(){
+        if(!query) return restaurants;
+        const q = query.toLowerCase();
+        return restaurants.map(r => ({...r, items: r.items.filter(it => {
+          return r.name.toLowerCase().includes(q) || r.cuisine.toLowerCase().includes(q) || it.name.toLowerCase().includes(q);
+        })})).filter(r => r.items.length>0);
+      }
+
+      const visible = filtered();
+
+      return (
+        <div>
+          <Header onSearch={setQuery} query={query} cartCount={cart.reduce((s,i)=>s+i.qty,0)} />
+
+          <div className="container">
+            <main className="left">
+              <Hero onExplore={()=>{window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})}} />
+
+              <section>
+                <h2 style={{margin:'12px 0'}}>Popular near you</h2>
+                <div style={{display:'flex',gap:12,marginBottom:12}}>
+                  <div className="badge">Fast delivery</div>
+                  <div className="badge">Offers</div>
+                  <div className="badge">Pure veg</div>
+                </div>
+
+                <div className="restaurants">
+                  {visible.length === 0 && <div className="empty">No restaurants or dishes found for "{query}"</div>}
+                  {visible.map(r => <RestaurantCard key={r.id} r={r} onAdd={handleAdd} />)}
+                </div>
+              </section>
+
+              <footer>
+                Built with ❤️ • Demo frontend — replace with APIs for production
+              </footer>
+            </main>
+
+            <Cart items={cart} onInc={inc} onDec={dec} onCheckout={handleCheckout} />
+          </div>
+        </div>
+      )
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
+
